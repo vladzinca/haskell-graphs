@@ -78,7 +78,7 @@ shouldBeTrue = graph1 == graph2
     fromList [2,3,4]
 -}
 outNeighbors :: Ord a => a -> StandardGraph a -> S.Set a
-outNeighbors node graph = undefined
+outNeighbors node graph = (S.fromList (map (\ (_, g) -> g) (filter (\ (f, _) -> (f == node)) (S.toList (edges graph)))))
 
 {-
     *** TODO ***
@@ -91,7 +91,7 @@ outNeighbors node graph = undefined
     fromList [4]
 -}
 inNeighbors :: Ord a => a -> StandardGraph a -> S.Set a
-inNeighbors node graph = undefined
+inNeighbors node graph = (S.fromList (map (\ (f, _) -> f) (filter (\ (_, g) -> (g == node)) (S.toList (edges graph)))))
 
 {-
     *** TODO ***
