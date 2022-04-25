@@ -16,7 +16,7 @@ type Graph a = StandardGraph a
 
     Funcție generală care abstractizează BFS și DFS pornind dintr-un anumit nod,
     prin funcția de îmbinare a listelor care constituie primul parametru.
-    
+
     Cele două liste primite ca parametru de funcția de îmbinare sunt lista
     elementelor deja aflate în structură (coadă/stivă), respectiv lista
     vecinilor nodului curent, proaspăt expandați.
@@ -26,12 +26,30 @@ type Graph a = StandardGraph a
     Hint: Scrieți o funcție auxiliară care primește ca parametru suplimentar
     o mulțime (set) care reține nodurile vizitate până în momentul curent.
 -}
+bfsfunction :: [a] -> [a] -> [a]
+bfsfunction existent neighbors = existent ++ neighbors
+
+dfsfunction :: [a] -> [a] -> [a]
+dfsfunction existent neighbors = neighbors ++ existent
+
+auxsearch :: Ord a
+       => ([a] -> [a] -> [a])
+       -> a
+       -> Graph a
+       -> [a]
+       -> S.Set a
+       -> [a]
+       -> [a]
+auxsearch f node graph staqueue visited tl = if (visited == (nodes graph)) then (reverse tl) else (if (staqueue == []) then (if (not (node `elem` tl)) then (reverse (node : tl)) else (reverse tl)) else (if (node `S.member` visited)
+                                                                                        then (auxsearch f (head staqueue) graph (tail staqueue) visited tl)
+                                                                                        else (auxsearch f (head (f staqueue (S.toList (outNeighbors node graph)))) graph (tail (f staqueue (S.toList (outNeighbors node graph)))) (S.fromList ((S.toList visited) ++ [node]))) (node : tl)))
+
 search :: Ord a
        => ([a] -> [a] -> [a])  -- funcția de îmbinare a listelor de noduri
        -> a                    -- nodul de pornire
        -> Graph a              -- graful
        -> [a]                  -- lista obținută în urma parcurgerii
-search f node graph = undefined
+search f node graph = auxsearch f node graph (f [] (S.toList (outNeighbors node graph))) S.empty []
 
 {-
     *** TODO ***
@@ -47,7 +65,7 @@ search f node graph = undefined
     [4,1,2,3]
 -}
 bfs :: Ord a => a -> Graph a -> [a]
-bfs = undefined
+bfs = (\ node graph -> (search bfsfunction node graph))
 
 {-
     *** TODO ***
@@ -56,14 +74,14 @@ bfs = undefined
 
     Exemple:
 
-    > dfs 1 graph4 
+    > dfs 1 graph4
     [1,2,4,3]
-    
+
     > dfs 4 graph4
     [4,1,2,3]
 -}
 dfs :: Ord a => a -> Graph a -> [a]
-dfs = undefined
+dfs = (\ node graph -> (search dfsfunction node graph))
 
 {-
     *** TODO ***
