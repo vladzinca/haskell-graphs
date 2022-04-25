@@ -87,7 +87,7 @@ outNeighbors node graph = (S.fromList (map (\ (_, g) -> g) (filter (\ (f, _) -> 
 
     Exemplu:
 
-    > inNeighbors 1 graph3 
+    > inNeighbors 1 graph3
     fromList [4]
 -}
 inNeighbors :: Ord a => a -> StandardGraph a -> S.Set a
@@ -143,4 +143,4 @@ mergeNodes :: Ord a
            -> a                -- noul nod
            -> StandardGraph a  -- graful existent
            -> StandardGraph a  -- graful obținut
-mergeNodes prop node graph = undefined
+mergeNodes prop node graph = ((S.fromList (if ((filter (\ x -> if (prop x) then False else True) (S.toList (nodes graph))) == (S.toList (nodes graph))) then (filter (\ x -> if (prop x) then False else True) (S.toList (nodes graph))) else (node : (filter (\ x -> if (prop x) then False else True) (S.toList (nodes graph)))))), (S.fromList (map (\ (f, g) -> (if (prop f && prop g) then (node, node) else (if (prop f) then (node, g) else (if (prop g) then (f, node) else (f, g))))) (S.toList (edges graph)))))
