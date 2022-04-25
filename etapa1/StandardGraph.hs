@@ -105,7 +105,7 @@ inNeighbors node graph = (S.fromList (map (\ (f, _) -> f) (filter (\ (_, g) -> (
     (fromList [2,3,4],fromList [(2,3)])
 -}
 removeNode :: Ord a => a -> StandardGraph a -> StandardGraph a
-removeNode node graph = undefined
+removeNode node graph = ((S.fromList (filter (\ f -> (not (f == node))) (S.toList (nodes graph)))), (S.fromList (filter (\ (f, g) -> (not ((f == node) || (g == node)))) (S.toList (edges graph)))))
 
 {-
     *** TODO ***
@@ -124,7 +124,7 @@ splitNode :: Ord a
           -> [a]              -- nodurile cu care este înlocuit
           -> StandardGraph a  -- graful existent
           -> StandardGraph a  -- graful obținut
-splitNode old news graph = undefined
+splitNode old news graph = ((S.fromList (filter (\ x -> (not (x == old))) ((S.toList (nodes graph)) ++ news))), (S.fromList ((filter (\ (f, g) -> (not ((f == old) || (g == old)))) (S.toList (edges graph)) ++ [(x, y) | x <- news, y <- (S.toList (outNeighbors old graph))] ++ [(x, y) | x <- (S.toList (inNeighbors old graph)), y <- news]))))
 
 {-
     *** TODO ***
