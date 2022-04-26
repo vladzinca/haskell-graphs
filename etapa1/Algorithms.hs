@@ -32,7 +32,7 @@ bfsfunction existent neighbors = existent ++ neighbors
 dfsfunction :: [a] -> [a] -> [a]
 dfsfunction existent neighbors = neighbors ++ existent
 
-auxsearch :: Ord a
+auxsearch :: (Ord a, Show a)
        => ([a] -> [a] -> [a])
        -> a
        -> Graph a
@@ -40,11 +40,17 @@ auxsearch :: Ord a
        -> S.Set a
        -> [a]
        -> [a]
-auxsearch f node graph staqueue visited tl = if (visited == (nodes graph)) then (reverse tl) else (if (staqueue == []) then (if (not (node `elem` tl)) then (reverse (node : tl)) else (reverse tl)) else (if (node `S.member` visited)
-                                                                                        then (auxsearch f (head staqueue) graph (tail staqueue) visited tl)
-                                                                                        else (auxsearch f (head (f staqueue (S.toList (outNeighbors node graph)))) graph (tail (f staqueue (S.toList (outNeighbors node graph)))) (S.fromList ((S.toList visited) ++ [node]))) (node : tl)))
+auxsearch f node graph staqueue visited tl = if (visited == (nodes graph))
+                                                then (reverse tl)
+                                                else (if (staqueue == [])
+                                                        then (if (not (node `elem` tl))
+                                                                then (auxsearch f node graph (filter (\ x -> (not (x `elem` visited))) (S.toList (outNeighbors node graph))) (S.fromList ((S.toList visited) ++ [node])) (node : tl))
+                                                                else (reverse tl))
+                                                        else (if (node `S.member` visited)
+                                                                then (auxsearch f (head staqueue) graph (tail staqueue) visited tl)
+                                                                else (auxsearch f (head (f staqueue (S.toList (outNeighbors node graph)))) graph (tail (f staqueue (S.toList (outNeighbors node graph)))) (S.fromList ((S.toList visited) ++ [node])) (node : tl))))
 
-search :: Ord a
+search :: (Ord a, Show a)
        => ([a] -> [a] -> [a])  -- funcția de îmbinare a listelor de noduri
        -> a                    -- nodul de pornire
        -> Graph a              -- graful
@@ -64,7 +70,7 @@ search f node graph = auxsearch f node graph (f [] (S.toList (outNeighbors node 
     > bfs 4 graph4
     [4,1,2,3]
 -}
-bfs :: Ord a => a -> Graph a -> [a]
+bfs :: (Ord a, Show a) => a -> Graph a -> [a]
 bfs = (\ node graph -> (search bfsfunction node graph))
 
 {-
@@ -80,7 +86,7 @@ bfs = (\ node graph -> (search bfsfunction node graph))
     > dfs 4 graph4
     [4,1,2,3]
 -}
-dfs :: Ord a => a -> Graph a -> [a]
+dfs :: (Ord a, Show a) => a -> Graph a -> [a]
 dfs = (\ node graph -> (search dfsfunction node graph))
 
 {-
@@ -112,9 +118,9 @@ dfs = (\ node graph -> (search dfsfunction node graph))
 
     Aici nu există cale între 3 și 1.
 -}
-countIntermediate :: Ord a
+countIntermediate :: (Ord a, Show a)
                   => a                 -- nodul sursă
                   -> a                 -- nodul destinație
                   -> StandardGraph a   -- graful
                   -> Maybe (Int, Int)  -- numărul de noduri expandate de BFS/DFS
-countIntermediate from to graph = undefined
+countIntermediate from to graph = (if (((length (fst (span (\ node -> (not (node == to))) (tail (bfs from graph)))) == (length (tail (bfs from graph)))) || ((length (fst (span (\ node -> (not (node == to))) (tail (dfs from graph)))) == (length (tail (dfs from graph))))))) then (Nothing) else (Just ((length (fst (span (\ node -> (not (node == to))) (tail (bfs from graph))))), (length (fst (span (\ node -> (not (node == to))) (tail (dfs from graph))))))))
