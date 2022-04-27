@@ -31,7 +31,7 @@ fromComponents :: Ord a
                => [a]              -- lista nodurilor
                -> [(a, a)]         -- lista arcelor
                -> StandardGraph a  -- graful construit
-fromComponents ns es = ((S.fromList ns), (S.fromList es))
+fromComponents ns es = (S.fromList ns, S.fromList es)
 
 {-
     *** TODO ***
@@ -39,7 +39,7 @@ fromComponents ns es = ((S.fromList ns), (S.fromList es))
     Mulțimea nodurilor grafului.
 -}
 nodes :: StandardGraph a -> S.Set a
-nodes = (\ graph -> (fst graph))
+nodes = \ graph -> fst graph
 
 {-
     *** TODO ***
@@ -47,7 +47,7 @@ nodes = (\ graph -> (fst graph))
     Mulțimea arcelor grafului.
 -}
 edges :: StandardGraph a -> S.Set (a, a)
-edges = (\ graph -> (snd graph))
+edges = \ graph -> snd graph
 
 {-
     Exemple de grafuri
@@ -78,7 +78,11 @@ shouldBeTrue = graph1 == graph2
     fromList [2,3,4]
 -}
 outNeighbors :: Ord a => a -> StandardGraph a -> S.Set a
-outNeighbors node graph = (S.fromList (map (\ (_, g) -> g) (filter (\ (f, _) -> (f == node)) (S.toList (edges graph)))))
+outNeighbors node graph = S.fromList $
+                            map (\ (_, g) -> g) $
+                                filter (\ (f, _) -> f == node) $
+                                    S.toList $
+                                        edges graph
 
 {-
     *** TODO ***
@@ -91,7 +95,11 @@ outNeighbors node graph = (S.fromList (map (\ (_, g) -> g) (filter (\ (f, _) -> 
     fromList [4]
 -}
 inNeighbors :: Ord a => a -> StandardGraph a -> S.Set a
-inNeighbors node graph = (S.fromList (map (\ (f, _) -> f) (filter (\ (_, g) -> (g == node)) (S.toList (edges graph)))))
+inNeighbors node graph = S.fromList $
+                            map (\ (f, _) -> f) $
+                                filter (\ (_, g) -> g == node) $
+                                    S.toList $
+                                        edges graph
 
 {-
     *** TODO ***
@@ -105,7 +113,15 @@ inNeighbors node graph = (S.fromList (map (\ (f, _) -> f) (filter (\ (_, g) -> (
     (fromList [2,3,4],fromList [(2,3)])
 -}
 removeNode :: Ord a => a -> StandardGraph a -> StandardGraph a
-removeNode node graph = ((S.fromList (filter (\ f -> (not (f == node))) (S.toList (nodes graph)))), (S.fromList (filter (\ (f, g) -> (not ((f == node) || (g == node)))) (S.toList (edges graph)))))
+removeNode node graph = (S.fromList $
+                            filter (\ f -> not $ f == node) $
+                                S.toList $
+                                    nodes graph,
+                         S.fromList $
+                             filter (\ (f, g) -> not $
+                                 (f == node || g == node)) $
+                                     S.toList $
+                                         edges graph)
 
 {-
     *** TODO ***
@@ -124,7 +140,20 @@ splitNode :: Ord a
           -> [a]              -- nodurile cu care este înlocuit
           -> StandardGraph a  -- graful existent
           -> StandardGraph a  -- graful obținut
-splitNode old news graph = ((S.fromList (filter (\ x -> (not (x == old))) ((S.toList (nodes graph)) ++ news))), (S.fromList ((filter (\ (f, g) -> (not ((f == old) || (g == old)))) (S.toList (edges graph)) ++ [(x, y) | x <- news, y <- (S.toList (outNeighbors old graph))] ++ [(x, y) | x <- (S.toList (inNeighbors old graph)), y <- news]))))
+splitNode old news graph = (S.fromList $
+                                filter (\ x -> not $ x == old) $
+                                    ((S.toList $ nodes graph) ++ news),
+                            S.fromList $
+                                filter (\ (f, g) -> not $
+                                    (f == old || g == old)) $
+                                        (S.toList $
+                                            edges graph) ++
+                                [(x, y) | x <- news,
+                                          y <- S.toList $
+                                                    outNeighbors old graph] ++
+                                [(x, y) | x <- S.toList $
+                                                    inNeighbors old graph,
+                                          y <- news])
 
 {-
     *** TODO ***
@@ -143,4 +172,30 @@ mergeNodes :: Ord a
            -> a                -- noul nod
            -> StandardGraph a  -- graful existent
            -> StandardGraph a  -- graful obținut
-mergeNodes prop node graph = ((S.fromList (if ((filter (\ x -> if (prop x) then False else True) (S.toList (nodes graph))) == (S.toList (nodes graph))) then (filter (\ x -> if (prop x) then False else True) (S.toList (nodes graph))) else (node : (filter (\ x -> if (prop x) then False else True) (S.toList (nodes graph)))))), (S.fromList (map (\ (f, g) -> (if (prop f && prop g) then (node, node) else (if (prop f) then (node, g) else (if (prop g) then (f, node) else (f, g))))) (S.toList (edges graph)))))
+mergeNodes prop node graph = (S.fromList $
+                                if (filter (\ x -> if prop x
+                                                   then False
+                                                   else True) $
+                                                       S.toList $
+                                                           nodes graph) ==
+                                   (S.toList $ nodes graph)
+                                then filter (\ x -> if prop x
+                                                    then False
+                                                    else True) $
+                                                        S.toList $
+                                                            nodes graph
+                                else node : (filter (\ x -> if prop x
+                                                            then False
+                                                            else True) $
+                                                                S.toList $
+                                                                nodes graph),
+                              S.fromList $
+                                map (\ (f, g) -> if prop f && prop g
+                                                 then (node, node)
+                                                 else if prop f
+                                                      then (node, g)
+                                                      else if prop g
+                                                           then (f, node)
+                                                           else (f, g)) $
+                                                            S.toList $
+                                                                edges graph)
