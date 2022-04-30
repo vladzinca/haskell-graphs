@@ -53,7 +53,15 @@ edges (Connect x y) = S.union (S.union (edges x) (edges y))
     prea multe muchii inutile.
 -}
 outNeighbors :: Ord a => a -> AlgebraicGraph a -> S.Set a
-outNeighbors node graph = undefined
+outNeighbors node Empty = S.empty
+outNeighbors node (Node x) = S.empty
+outNeighbors node (Overlay x y) = S.union (outNeighbors node x)
+                                          (outNeighbors node y)
+outNeighbors node (Connect x y) = S.union (S.union (outNeighbors node x)
+                                                   (outNeighbors node y))
+                                          (if node `S.member` (nodes x)
+                                           then nodes y
+                                           else S.empty)
 
 {-
     *** TODO ***
@@ -64,7 +72,15 @@ outNeighbors node graph = undefined
     prea multe muchii inutile.
 -}
 inNeighbors :: Ord a => a -> AlgebraicGraph a -> S.Set a
-inNeighbors node graph = undefined
+inNeighbors node Empty = S.empty
+inNeighbors node (Node x) = S.empty
+inNeighbors node (Overlay x y) = S.union (inNeighbors node x)
+                                         (inNeighbors node y)
+inNeighbors node (Connect x y) = S.union (S.union (inNeighbors node x)
+                                                  (inNeighbors node y))
+                                         (if node `S.member` (nodes y)
+                                          then nodes x
+                                          else S.empty)
 
 {-
     *** TODO ***
