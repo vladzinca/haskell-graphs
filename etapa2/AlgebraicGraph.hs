@@ -95,7 +95,12 @@ inNeighbors node (Connect x y) = S.union (S.union (inNeighbors node x)
     parametrul graph se modifică.
 -}
 removeNode :: Eq a => a -> AlgebraicGraph a -> AlgebraicGraph a
-removeNode node graph = undefined
+removeNode node Empty = Empty
+removeNode node (Node x) = if node == x
+                           then Empty
+                           else Node x
+removeNode node (Overlay x y) = Overlay (removeNode node x) (removeNode node y)
+removeNode node (Connect x y) = Connect (removeNode node x) (removeNode node y)
 
 {-
     *** TODO ***
@@ -103,7 +108,7 @@ removeNode node graph = undefined
     Divizează un nod în mai multe noduri, cu eliminarea nodului inițial.
     Arcele în care era implicat vechiul nod trebuie să devină valabile
     pentru noile noduri.
-    
+
     Hint: Funcție recursivă locală, ca la removeNode.
 -}
 splitNode :: Eq a
