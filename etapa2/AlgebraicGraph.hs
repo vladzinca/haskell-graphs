@@ -116,7 +116,12 @@ splitNode :: Eq a
           -> [a]               -- nodurile cu care este înlocuit
           -> AlgebraicGraph a  -- graful existent
           -> AlgebraicGraph a  -- graful obținut
-splitNode old news graph = undefined
+splitNode old news Empty = Empty
+splitNode old news (Node x) = if old == x
+                              then (if (news /= []) then (Overlay (Node (head news)) (splitNode old (tail news) (Node x))) else Empty)
+                              else (Node x)
+splitNode old news (Overlay x y) = Overlay (splitNode old news x) (splitNode old news y)
+splitNode old news (Connect x y) = Connect (splitNode old news x) (splitNode old news y)
 
 {-
     *** TODO ***
