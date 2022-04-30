@@ -118,10 +118,18 @@ splitNode :: Eq a
           -> AlgebraicGraph a  -- graful obținut
 splitNode old news Empty = Empty
 splitNode old news (Node x) = if old == x
-                              then (if (news /= []) then (Overlay (Node (head news)) (splitNode old (tail news) (Node x))) else Empty)
-                              else (Node x)
-splitNode old news (Overlay x y) = Overlay (splitNode old news x) (splitNode old news y)
-splitNode old news (Connect x y) = Connect (splitNode old news x) (splitNode old news y)
+                              then if news /= []
+                                   then Overlay (Node $
+                                                    head news)
+                                                (splitNode old
+                                                           (tail news)
+                                                           (Node x))
+                                   else Empty
+                              else Node x
+splitNode old news (Overlay x y) = Overlay (splitNode old news x)
+                                           (splitNode old news y)
+splitNode old news (Connect x y) = Connect (splitNode old news x)
+                                           (splitNode old news y)
 
 {-
     *** TODO ***
@@ -136,4 +144,11 @@ mergeNodes :: (a -> Bool)       -- proprietatea îndeplinită de nodurile îmbin
            -> a                 -- noul nod
            -> AlgebraicGraph a  -- graful existent
            -> AlgebraicGraph a  -- graful obținut
-mergeNodes prop node graph = undefined
+mergeNodes prop node Empty = Empty
+mergeNodes prop node (Node x) = if prop x
+                                then Node node
+                                else Node x
+mergeNodes prop node (Overlay x y) = Overlay (mergeNodes prop node x)
+                                             (mergeNodes prop node y)
+mergeNodes prop node (Connect x y) = Connect (mergeNodes prop node x)
+                                             (mergeNodes prop node y)
