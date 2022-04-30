@@ -14,6 +14,12 @@ import qualified Data.Set as S
     type introduce un sinonim de tip, similar cu typedef din C.
 -}
 type StandardGraph a = (S.Set a, S.Set (a, a))
+-- =====
+-- M-am gandit ca s-ar putea implementa ceva de genul:
+-- =====
+-- data StandardGraph a
+--     = Pereche [Int] [(Int, Int)]
+--     deriving (Eq, Show)
 
 {-
     *** TODO ***
@@ -31,7 +37,11 @@ fromComponents :: Ord a
                => [a]              -- lista nodurilor
                -> [(a, a)]         -- lista arcelor
                -> StandardGraph a  -- graful construit
-fromComponents ns es = undefined
+fromComponents ns es = (S.fromList ns, S.fromList es)
+-- =====
+-- Folosind implementarea mea, fromComponents ar deveni:
+-- =====
+-- fromComponents ns es = Pereche ns es
 
 {-
     *** TODO ***
@@ -39,7 +49,11 @@ fromComponents ns es = undefined
     Mulțimea nodurilor grafului.
 -}
 nodes :: StandardGraph a -> S.Set a
-nodes = undefined
+nodes = \ graph -> fst graph
+-- =====
+-- Folosind implementarea mea, nodes ar folosi pattern matching si ar deveni:
+-- =====
+-- nodes = \ (Pair f _) -> f
 
 {-
     *** TODO ***
@@ -47,7 +61,11 @@ nodes = undefined
     Mulțimea arcelor grafului.
 -}
 edges :: StandardGraph a -> S.Set (a, a)
-edges = undefined
+edges = \ graph -> snd graph
+-- =====
+-- Folosind implementarea mea, edges ar folosi pattern matching si ar deveni:
+-- =====
+-- edges = \ (Pair _ g) -> g
 
 {-
     Exemple de grafuri
@@ -87,7 +105,7 @@ outNeighbors node graph = undefined
 
     Exemplu:
 
-    > inNeighbors 1 graph3 
+    > inNeighbors 1 graph3
     fromList [4]
 -}
 inNeighbors :: Ord a => a -> StandardGraph a -> S.Set a
