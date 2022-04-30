@@ -30,8 +30,27 @@ type Partition a = S.Set (S.Set a)
     > mapSingle (+10) [1,2,3]
     [[11,2,3],[1,12,3],[1,2,13]]
 -}
+auxModifyIthValue :: (a -> a) -> [a] -> Int -> Int -> Int -> [a]
+auxModifyIthValue f xs len i j = if j == len
+                                 then []
+                                 else if j == i
+                                      then (f $ head xs) :
+                                           (auxModifyIthValue f (tail xs)
+                                                              len i (j + 1))
+                                      else (head xs) :
+                                           (auxModifyIthValue f (tail xs)
+                                                              len i (j + 1))
+
+modifyIthValue :: (a -> a) -> [a] -> Int -> [a]
+modifyIthValue f xs i = auxModifyIthValue f xs (length xs) i 0
+
+auxMapSingle :: (a -> a) -> [a] -> Int -> [[a]]
+auxMapSingle f xs i = if i == length xs
+                      then []
+                      else (modifyIthValue f xs i) : (auxMapSingle f xs (i + 1))
+
 mapSingle :: (a -> a) -> [a] -> [[a]]
-mapSingle f xs = undefined
+mapSingle f xs = auxMapSingle f xs 0
 
 {-
     *** TODO ***
